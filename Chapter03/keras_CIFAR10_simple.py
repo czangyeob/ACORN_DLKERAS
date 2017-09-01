@@ -53,7 +53,6 @@ model.add(Activation('softmax'))
 model.summary()
 
 # 학습
-# optim = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy', optimizer=OPTIM,
               metrics=['accuracy'])
 
@@ -75,7 +74,6 @@ model.save_weights('cifar10_weights.h5', overwrite=True)
 # 히스토리에 있는 모든 데이터 나열
 print(history.history.keys())
 # 단순 정확도에 대한 히스토리 요약
-# plt.plot(mo)
 plt.plot(history.history['val_acc'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
