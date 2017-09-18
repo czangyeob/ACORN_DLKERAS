@@ -66,8 +66,7 @@ if __name__ == "__main__":
     K.set_image_dim_ordering("th")
 
     # 사전 학습된 모델 테스트
-    # 파일 다운로드 필요
-    model = VGG_16('./vgg16_weights_tf_dim_ordering_tf_kernels.h5')
+    model = VGG_16('./vgg16_weights_tf_dim_ordering_tf_kernels.h5') # 파일 다운로드 필요
 
     optimizer = SGD()
     model.compile(optimizer=optimizer, loss='categorical_crossentropy')
