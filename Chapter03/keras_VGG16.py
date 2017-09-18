@@ -57,21 +57,18 @@ def VGG_16(weights_path=None):
     if weights_path:
         model.load_weights(weights_path)
 
-        try:
-            self.load_weights_from_hdf5_group(f)
-        except KeyError:
-            self.load_weights_from_hdf5_group(f['model_weights'])
-
     return model
 
 if __name__ == "__main__":
-    im = cv2.resize(cv2.imread('cat.jpg'), (224, 224)).astype(np.float32)
+    im = cv2.resize(cv2.imread('./data/cat.jpg'), (224, 224)).astype(np.float32)
     im = im.transpose((2,0,1))
     im = np.expand_dims(im, axis=0)
     K.set_image_dim_ordering("th")
 
     # 사전 학습된 모델 테스트
-    model = VGG_16('vgg16_weights.h5')
+    # 파일 다운로드 필요
+    model = VGG_16('./vgg16_weights_tf_dim_ordering_tf_kernels.h5')
+
     optimizer = SGD()
     model.compile(optimizer=optimizer, loss='categorical_crossentropy')
     out = model.predict(im)
