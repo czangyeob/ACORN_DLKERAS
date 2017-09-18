@@ -5,7 +5,7 @@ from keras.layers import Dense, GlobalAveragePooling2D
 from keras import backend as K
 
 
-# 사전 학습한 베이스 모델 생성
+# 사전 학습된 베이스 모델 생성
 base_model = InceptionV3(weights='imagenet', include_top=False)
 
 # layer.name, layer.input_shape, layer.output_shape
