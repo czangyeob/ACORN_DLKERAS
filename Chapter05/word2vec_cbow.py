@@ -15,9 +15,9 @@ BATCH_SIZE = 128
 NUM_EPOCHS = 20
 
 lines = []
-fin = open("../data/alice_in_wonderland.txt", "rb")
+fin = open("../data/alice_in_wonderland.txt", "r")
 for line in fin:
-    line = line.strip().decode("ascii", "ignore").encode("utf-8")
+    line = line.strip()
     if len(line) == 0:
         continue
     lines.append(line)
@@ -56,7 +56,7 @@ model.add(Activation("softmax"))
 model.compile(optimizer="rmsprop", loss="categorical_crossentropy", 
               metrics=["accuracy"])
 history = model.fit(Xtrain, Ytrain, batch_size=BATCH_SIZE, 
-                    epochs=NUM_EPOCHS, verbose=1,
+                    nb_epoch=NUM_EPOCHS, verbose=1,
                     validation_data=(Xtest, Ytest))
 
 # plot loss function
