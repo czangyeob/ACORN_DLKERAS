@@ -49,4 +49,4 @@ from keras.optimizers import SGD
 model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),loss='categorical_crossentropy')
 
 # 모델을 다시 학습(이번에는 최상위 덴스 계층옆에 있는 2개 블록에 대해 미세조정(fine-tuning)
-model.fit_generator(...)
+#model.fit_generator(...)
