@@ -15,10 +15,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+
 def parse_sentences(filename):
     sents = []
     word_freqs = collections.Counter()
-    fin = open(filename, "r")
+    fin = open(filename, "rb")
     for line in fin:
         words = line.strip().lower().split()
         for word in words:
@@ -27,13 +28,15 @@ def parse_sentences(filename):
     fin.close()
     return sents, word_freqs
 
+
 def get_or_else(dictionary, key, default_value):
     try:
         return dictionary[key]
     except KeyError:
         return default_value
-        
-def generate_batch(s_sents, s_word2index, t_sents, t_word2index, 
+
+
+def generate_batch(s_sents, s_word2index, t_sents, t_word2index,
                    batch_size, maxlen):
     while True:
         # shuffle the input
@@ -41,26 +44,27 @@ def generate_batch(s_sents, s_word2index, t_sents, t_word2index,
         ss_sents = [s_sents[ix] for ix in indices]
         ts_sents = [t_sents[ix] for ix in indices]
         # convert to word indices
-        si_sents = [[get_or_else(s_word2index, word, s_word2index["UNK"]) 
-                    for word in sent] 
+        si_sents = [[get_or_else(s_word2index, word, s_word2index["UNK"])
+                     for word in sent]
                     for sent in ss_sents]
         ti_sents = [[t_word2index[word] for word in sent]
                     for sent in ts_sents]
         # inner loop should run for an epoch
         num_batches = len(s_sents) // batch_size
         for i in range(num_batches):
-            s_batch = si_sents[i * batch_size : (i + 1) * batch_size]
-            t_batch = ti_sents[i * batch_size : (i + 1) * batch_size]
+            s_batch = si_sents[i * batch_size: (i + 1) * batch_size]
+            t_batch = ti_sents[i * batch_size: (i + 1) * batch_size]
             sp_batch = sequence.pad_sequences(s_batch, maxlen=maxlen)
             tp_batch = sequence.pad_sequences(t_batch, maxlen=maxlen)
-            tpc_batch = np_utils.to_categorical(tp_batch.reshape(-1, 1), 
-                nb_classes=len(t_word2index)).reshape(batch_size,
-                -1, len(t_word2index))
+            tpc_batch = np_utils.to_categorical(tp_batch.reshape(-1, 1),
+                                                num_classes=len(t_word2index)).reshape(batch_size,
+                                                                                       -1, len(t_word2index))
             yield sp_batch, tpc_batch
+
 
 def top_3_categorical_accuracy(ytrue, ypred):
     return top_k_categorical_accuracy(ytrue, ypred, k=3)
-    
+
 
 ########################## main ##########################
 
@@ -101,17 +105,17 @@ NUM_ITERATIONS = 20
 
 # lookup tables
 s_vocabsize = min(len(s_wordfreqs), S_MAX_FEATURES) + 2
-s_word2index = {x[0]:i+2 for i, x in 
-    enumerate(s_wordfreqs.most_common(S_MAX_FEATURES))}
+s_word2index = {x[0]: i + 2 for i, x in
+                enumerate(s_wordfreqs.most_common(S_MAX_FEATURES))}
 s_word2index["PAD"] = 0
 s_word2index["UNK"] = 1
-s_index2word = {v:k for k, v in s_word2index.items()}
+s_index2word = {v: k for k, v in s_word2index.items()}
 
 t_vocabsize = len(t_wordfreqs) + 1
-t_word2index = {x[0]:i+1 for i, x in 
-    enumerate(t_wordfreqs.most_common(T_MAX_FEATURES))}
+t_word2index = {x[0]: i + 1 for i, x in
+                enumerate(t_wordfreqs.most_common(T_MAX_FEATURES))}
 t_word2index["PAD"] = 0
-t_index2word = {v:k for k, v in t_word2index.items()}
+t_index2word = {v: k for k, v in t_word2index.items()}
 
 # split into train and test
 test_size = int(0.3 * len(s_sents))
@@ -127,15 +131,14 @@ print(len(s_sents_train), len(s_sents_test))
 model = Sequential()
 model.add(Embedding(s_vocabsize, EMBED_SIZE,
                     input_length=MAX_SEQLEN,
-                    init="glorot_uniform"))
-
-#model.add(GRU(HIDDEN_SIZE)) 
+                    embeddings_initializer="glorot_uniform"))
+# model.add(GRU(HIDDEN_SIZE))
 model.add(LSTM(HIDDEN_SIZE))
-#model.add(Bidirectional(LSTM(HIDDEN_SIZE, dropout_W=0.2, dropout_U=0.2)))
+# model.add(Bidirectional(LSTM(HIDDEN_SIZE, dropout_W=0.2, dropout_U=0.2)))
 model.add(RepeatVector(MAX_SEQLEN))
-#model.add(GRU(HIDDEN_SIZE, return_sequences=True))
+# model.add(GRU(HIDDEN_SIZE, return_sequences=True))
 model.add(LSTM(HIDDEN_SIZE, return_sequences=True))
-#model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=True)))
+# model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=True)))
 model.add(TimeDistributed(Dense(t_vocabsize)))
 model.add(Activation("softmax"))
 
@@ -146,19 +149,19 @@ num_train_samples = len(s_sents_train) // BATCH_SIZE
 num_test_samples = len(s_sents_test) // BATCH_SIZE
 
 hist_acc, hist_val_acc, hist_loss, hist_val_loss = [], [], [], []
-for i in range(NUM_ITERATIONS):    
-    history = model.fit_generator(train_gen, 
-                                  samples_per_epoch=num_train_samples,
-                                  nb_epoch=NUM_EPOCHS,
-                                  validation_data=test_gen, 
-                                  nb_val_samples=num_test_samples)
+for i in range(NUM_ITERATIONS):
+    history = model.fit_generator(train_gen,
+                                  steps_per_epoch=num_train_samples,
+                                  epochs=NUM_EPOCHS,
+                                  validation_data=test_gen,
+                                  validation_steps=num_test_samples)
     # save off history data
     hist_acc.extend(history.history["acc"])
     hist_val_acc.extend(history.history["val_acc"])
     hist_loss.extend(history.history["loss"])
     hist_val_loss.extend(history.history["val_loss"])
     # show some predictions
-    Xtest, Ytest = test_gen.__next__()
+    Xtest, Ytest = test_gen.next()
     Ytest_ = model.predict(Xtest)
     ytest = np.argmax(Ytest, axis=2)
     ytest_ = np.argmax(Ytest_, axis=2)
@@ -171,11 +174,11 @@ for i in range(NUM_ITERATIONS):
         pos_labels = [t_index2word[x] for x in ytest[i].tolist()]
         pos_preds = [t_index2word[x] for x in ytest_[i].tolist()]
         triples = [x for x in zip(sent_words, pos_labels, pos_preds)
-            if x[0] != "PAD"]
-        print("label:     " + " ".join([x[0] + x[1].upper() 
-            for x in triples]))
-        print("predicted: " + " ".join([x[0] + x[2].upper() 
-            for x in triples]))
+                   if x[0] != "PAD"]
+        print("label:     " + " ".join([x[0] + x[1].upper()
+                                        for x in triples]))
+        print("predicted: " + " ".join([x[0] + x[2].upper()
+                                        for x in triples]))
         print("-" * 80)
 
 # plot loss and accuracy
@@ -193,4 +196,3 @@ plt.legend(loc="best")
 
 plt.tight_layout()
 plt.show()
-
