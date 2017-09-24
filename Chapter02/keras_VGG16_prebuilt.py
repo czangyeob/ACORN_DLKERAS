@@ -11,7 +11,7 @@ for i, layer in enumerate(base_model.layers):
 	print (i, layer.name, layer.output_shape)
 
 # block4_pool 블록에서 특징 추출
-model = Model(input=base_model.input, output=base_model.get_layer('block4_pool').output)
+model = Model(inputs=base_model.input, outputs=base_model.get_layer('block4_pool').output)
 
 img_path = './data/cat.jpg'
 img = image.load_img(img_path, target_size=(224, 224))
