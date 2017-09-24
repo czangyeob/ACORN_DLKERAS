@@ -39,17 +39,17 @@ def get_or_else(dictionary, key, default_value):
 def generate_batch(s_sents, s_word2index, t_sents, t_word2index,
                    batch_size, maxlen):
     while True:
-        # shuffle the input
+        # 입력 값 셔플
         indices = np.random.permutation(np.arange(len(s_sents)))
         ss_sents = [s_sents[ix] for ix in indices]
         ts_sents = [t_sents[ix] for ix in indices]
-        # convert to word indices
+        # 단어 인덱스로 변환
         si_sents = [[get_or_else(s_word2index, word, s_word2index["UNK"])
                      for word in sent]
                     for sent in ss_sents]
         ti_sents = [[t_word2index[word] for word in sent]
                     for sent in ts_sents]
-        # inner loop should run for an epoch
+        # 각 에폭 마다 실행
         num_batches = len(s_sents) // batch_size
         for i in range(num_batches):
             s_batch = si_sents[i * batch_size: (i + 1) * batch_size]
@@ -70,7 +70,7 @@ def top_3_categorical_accuracy(ytrue, ypred):
 
 DATA_DIR = "../data"
 
-# data exploration, set constants
+# 데이터 탐색, 상수 정의
 s_sents, s_wordfreqs = parse_sentences(os.path.join(DATA_DIR, "reuters-sent.txt"))
 t_sents, t_wordfreqs = parse_sentences(os.path.join(DATA_DIR, "reuters-pos.txt"))
 sent_lengths = np.array([len(sent) for sent in s_sents])
@@ -88,7 +88,7 @@ print("# words/sentence: min: {:d}, max: {:d}, mean: {:.3f}, median: {:.0f}"
 ## words/sentence: min: 3, max: 429, mean: 26.694, median: 26
 ## np.where(sent_lengths <= 50)[0].shape
 ## (100343,)
-## Gives rise to the following constants
+
 
 MAX_SEQLEN = 50
 S_MAX_FEATURES = 50000
@@ -99,11 +99,10 @@ HIDDEN_SIZE = 100
 
 BATCH_SIZE = 64
 
-# run for 1000 epochs, show sample results every 50
 NUM_EPOCHS = 50
 NUM_ITERATIONS = 20
 
-# lookup tables
+# 룩업 테이블
 s_vocabsize = min(len(s_wordfreqs), S_MAX_FEATURES) + 2
 s_word2index = {x[0]: i + 2 for i, x in
                 enumerate(s_wordfreqs.most_common(S_MAX_FEATURES))}
@@ -117,7 +116,7 @@ t_word2index = {x[0]: i + 1 for i, x in
 t_word2index["PAD"] = 0
 t_index2word = {v: k for k, v in t_word2index.items()}
 
-# split into train and test
+# 학습 데이터와 테스트 데이터로 분할
 test_size = int(0.3 * len(s_sents))
 s_sents_train, s_sents_test = s_sents[0:-test_size], s_sents[-test_size:]
 t_sents_train, t_sents_test = t_sents[0:-test_size], t_sents[-test_size:]
@@ -127,7 +126,7 @@ test_gen = generate_batch(s_sents_test, s_word2index, t_sents_test,
                           t_word2index, BATCH_SIZE, MAX_SEQLEN)
 print(len(s_sents_train), len(s_sents_test))
 
-# define network
+# 네트워크 정의
 model = Sequential()
 model.add(Embedding(s_vocabsize, EMBED_SIZE,
                     input_length=MAX_SEQLEN,
@@ -155,12 +154,12 @@ for i in range(NUM_ITERATIONS):
                                   epochs=NUM_EPOCHS,
                                   validation_data=test_gen,
                                   validation_steps=num_test_samples)
-    # save off history data
+    # 히스토리 데이터 저장
     hist_acc.extend(history.history["acc"])
     hist_val_acc.extend(history.history["val_acc"])
     hist_loss.extend(history.history["loss"])
     hist_val_loss.extend(history.history["val_loss"])
-    # show some predictions
+    # 일부 예측 표
     Xtest, Ytest = test_gen.next()
     Ytest_ = model.predict(Xtest)
     ytest = np.argmax(Ytest, axis=2)
@@ -181,7 +180,7 @@ for i in range(NUM_ITERATIONS):
                                         for x in triples]))
         print("-" * 80)
 
-# plot loss and accuracy
+# 손실과 정확도 시각화
 plt.subplot(211)
 plt.title("Accuracy")
 plt.plot(hist_acc, color="g", label="Train")
