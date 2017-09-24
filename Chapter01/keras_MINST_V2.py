@@ -9,7 +9,7 @@ from keras.utils import np_utils
 np.random.seed(1671)  # 재현을 위한 설정
 
 # 네트워크와 학습 설정
-NB_EPOCH = 200
+NB_EPOCH = 20
 BATCH_SIZE = 128
 VERBOSE = 1
 NB_CLASSES = 10   # 출력 범주 = 숫자의 종류 0~9
