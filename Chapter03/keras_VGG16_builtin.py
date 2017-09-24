@@ -12,7 +12,7 @@ sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(optimizer=sgd, loss='categorical_crossentropy')
 
 # VGG16 학습된 이미지 포맷으로 리사이즈
-im = cv2.resize(cv2.imread('steam-locomotive.jpg'), (224, 224))
+im = cv2.resize(cv2.imread('./data/steam-locomotive.jpg'), (224, 224))
 im = np.expand_dims(im, axis=0)
 
 # 예측

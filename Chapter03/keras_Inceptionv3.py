@@ -20,17 +20,16 @@ x = base_model.output
 x = GlobalAveragePooling2D()(x) #  첫 계층으로 완전 연결 계층 추가
 x = Dense(1024, activation='relu')(x) # 마지막에 200 클래스를 갖는 로지스틱 계층
 predictions = Dense(200, activation='softmax')(x) # 학습할 모델
-model = Model(input=base_model.input, output=predictions)
+model = Model(inputs=base_model.input, outputs=predictions)
 
-# that is, freeze all convolutional InceptionV3 layers
+# 모든 합성곱 InceptionV3 계층을 고정
 for layer in base_model.layers:
     layer.trainable = False
 
-# compile the model (should be done *after* setting layers to nontrainable)
+# 모델 컴파일 (계층을 트레이닝하지 않도록 설정한 *후에* 실행)
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
-# train the model on the new data for a few epochs model.fit_generator(...)
-
+# 에폭에 걸쳐 새로운 데이터로 모델 학습 몇 번의  model.fit_generator(...)
 
 
 # 모델 컴파일 (학습되지 않도록 계층을 고정한 후에 진행)

@@ -69,20 +69,20 @@ model.compile(loss='categorical_crossentropy', optimizer=OPTIM,
               metrics=['accuracy'])
 
 datagen = ImageDataGenerator(
-    featurewise_center=False,  # set input mean to 0 over the dataset
-    samplewise_center=False,  # set each sample mean to 0
-    featurewise_std_normalization=False,  # divide inputs by std of the dataset
-    samplewise_std_normalization=False,  # divide each input by its std
-    zca_whitening=False,  # apply ZCA whitening
-    rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
-    width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-    height_shift_range=0.1,  #  randomly shift images vertically (fraction of total height)
-    horizontal_flip=True,  # randomly flip images
-    vertical_flip=False)  # randomly flip images
+    featurewise_center=False,  # 데이터셋의 입력 평균을 0으로
+    samplewise_center=False,  # 각 샘풀의 평균을 0으로
+    featurewise_std_normalization=False,  # 데이터셋 입력 정규화
+    samplewise_std_normalization=False,  # 샘플을 정규화
+    zca_whitening=False,  # ZCA whitening 적용
+    rotation_range=0,  # (0~180)도 랜덤하게 이미지 회전
+    width_shift_range=0.1,  # 이미지를 수평 방향으로 랜덤 시프트 (전체 너비에 대한 비율)
+    height_shift_range=0.1, # 이미지를 수 방향으로 랜덤 시프트 (전체 높이에 대한 비율)
+    horizontal_flip=True,  # 랜덤하게 이미지 뒤집기
+    vertical_flip=False)  # 랜덤하게 이미지 뒤집기
 
 datagen.fit(X_train)
 
-# train
+# 학습
 
 history = model.fit(X_train, Y_train, batch_size=BATCH_SIZE,
                     epochs=NB_EPOCH, validation_split=VALIDATION_SPLIT,
@@ -94,14 +94,14 @@ score = model.evaluate(X_test, Y_test,
 print("\nTest score:", score[0])
 print('Test accuracy:', score[1])
 
-# save model
+# 모델 저장
 model_json = model.to_json()
 open('cifar10_architecture.json', 'w').write(model_json)
 model.save_weights('cifar10_weights.h5', overwrite=True)
 
-# list all data in history
+# 히스토리의 모든 데이터 목록
 print(history.history.keys())
-# summarize history for accuracy
+# 정확도 히스토리를 요약
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
 plt.title('model accuracy')
@@ -109,7 +109,7 @@ plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
-# summarize history for loss
+# 손실 히스토리를 요약
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')

@@ -5,7 +5,7 @@ from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
 import cv2, numpy as np
 
-# define a VGG16 network
+# VGG16 네트워크 정의
 
 def VGG_16(weights_path=None):
     model = Sequential()
@@ -47,7 +47,7 @@ def VGG_16(weights_path=None):
 
     model.add(Flatten())
 
-    #top layer of the VGG net
+    # VGG 꼭대기 계층
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(4096, activation='relu'))
