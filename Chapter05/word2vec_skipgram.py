@@ -79,17 +79,16 @@ plt.legend(loc="best")
 plt.tight_layout()
 plt.show()
 
-# evaluate model
+# 모델 평가
 score = model.evaluate(Xtest, Ytest, verbose=1)
 print("Test score: {:.3f}, accuracy: {:.3f}".format(score[0], score[1]))
 
-# using the word2vec model
+# word2vec 모델 사용
 word2idx = tokenizer.word_index
 idx2word = {v:k for k, v in word2idx.items()}
 
-# retrieve the weights from the first dense layer. This will convert
-# the input vector from a one-hot sum of two words to a dense 300 
-# dimensional representation
+# 첫 덴스 계층에서 가중치를 추출함.
+# 두 단어의 원핫으로 부터 300 차원 표현으로 변환
 W, b = model.layers[0].get_weights()
 
 idx2emb = {}    
