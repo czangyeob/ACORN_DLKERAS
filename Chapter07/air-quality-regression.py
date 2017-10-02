@@ -28,7 +28,7 @@ Xorig.shape
 
 scaler = StandardScaler()
 Xscaled = scaler.fit_transform(Xorig)
-# store these off for predictions with unseen data
+# 처음 본 데이터를 예측할 때 사용하기 위해 저장한다.
 Xmeans = scaler.mean_
 Xstds = scaler.scale_
 
