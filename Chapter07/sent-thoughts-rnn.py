@@ -51,7 +51,7 @@ def compute_cosine_similarity(x, y):
     return np.dot(x, y) / (np.linalg.norm(x, 2) * np.linalg.norm(y, 2))
 
 
-############################### msin  ###############################
+############################### 메인  ###############################
 
 DATA_DIR = "../data"
 
@@ -90,22 +90,22 @@ sent_wids = [[lookup_word2id(w) for w in s.split()]
                                    for s in sents]
 sent_wids = sequence.pad_sequences(sent_wids, SEQUENCE_LEN)
 
-# load glove vectors into weight matrix
+# glove vectors를 불러와서 가중치 행렬에 넣는다.
 embeddings = load_glove_vectors(os.path.join(
     DATA_DIR, "glove.6B.{:d}d.txt".format(EMBED_SIZE)), word2id, EMBED_SIZE)
 print(embeddings.shape)
 
-# split sentences into training and test
+# 문장을 학습 데이터와 테스트 데이터로 나눈다.
 train_size = 0.7
 Xtrain, Xtest = train_test_split(sent_wids, train_size=train_size)
 print("number of sentences: ", len(sent_wids))
 print(Xtrain.shape, Xtest.shape)
 
-# define training and test generators
+# 학습 데이터와 테스트 데이터 제네레이터 정의
 train_gen = sentence_generator(Xtrain, embeddings, BATCH_SIZE)
 test_gen = sentence_generator(Xtest, embeddings, BATCH_SIZE)
 
-# define autoencoder network
+# 오토인코더 네트워크 정의
 inputs = Input(shape=(SEQUENCE_LEN, EMBED_SIZE), name="input")
 encoded = Bidirectional(LSTM(LATENT_SIZE), merge_mode="sum", 
                         name="encoder_lstm")(inputs)
@@ -118,7 +118,7 @@ autoencoder = Model(inputs, decoded)
 
 autoencoder.compile(optimizer="sgd", loss="mse")
 
-# train
+# 학습
 num_train_steps = len(Xtrain) // BATCH_SIZE
 num_test_steps = len(Xtest) // BATCH_SIZE
 checkpoint = ModelCheckpoint(filepath=os.path.join(DATA_DIR, "sent-thoughts-autoencoder.h5"),
@@ -130,7 +130,7 @@ history = autoencoder.fit_generator(train_gen,
                                    validation_steps=num_test_steps,
                                    callbacks=[checkpoint])
 
-# plot results
+# 결과 시각화
 plt.plot(history.history["loss"], color="g", label="train")
 plt.plot(history.history["val_loss"], color="b", label="validation")
 plt.ylabel("loss (MSE)")
@@ -138,15 +138,15 @@ plt.xlabel("epochs")
 plt.legend(loc="best")
 plt.show()
 
-# collect autoencoder predictions for test set
+# 테스트 데이터에 대한 오토인코더 예측
 test_inputs, test_labels = test_gen.next()
 preds = autoencoder.predict(test_inputs)
 
-# extract encoder part from autoencoder
+# 오토인코더의 인코더 부분 추출
 encoder = Model(autoencoder.input, autoencoder.get_layer("encoder_lstm").output)
 #encoder.summary()    
 
-# compute difference between vector produced by original and autoencoded
+# 원본과 오토인코딩된 벡터 사이의 차이 계산
 k = 500
 cosims = np.zeros((k))
 i = 0
