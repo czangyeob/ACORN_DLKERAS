@@ -161,8 +161,8 @@ VOCAB_SIZE = 5000
 
 vocab = maybe_build_vocab(REUTERS_DIR, VOCAB_FILE)
 
-ftext = open(os.path.join(DATA_DIR, "text.tsv"), "wb")
-ftags = open(os.path.join(DATA_DIR, "tags.tsv"), "wb")
+ftext = open(os.path.join(DATA_DIR, "text.tsv"), "w")
+ftags = open(os.path.join(DATA_DIR, "tags.tsv"), "w")
 num_read = 0
 for doc in stream_reuters_documents(REUTERS_DIR):
     # periodic heartbeat report

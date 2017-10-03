@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import nltk
 import numpy as np
 import os
-
+import codecs
 
 def lookup_word2id(word):
     try:
@@ -23,13 +23,14 @@ def lookup_word2id(word):
 
 def load_glove_vectors(glove_file, word2id, embed_size):
     embedding = np.zeros((len(word2id), embed_size))
-    fglove = open(glove_file, "rb")
+    fglove = codecs.open(glove_file, "r", encoding='latin-1')
     for line in fglove:
         cols = line.strip().split()
         word = cols[0]
         if embed_size == 0:
             embed_size = len(cols) - 1
-        if word2id.has_key(word):
+        #if word2id.has_key(word):
+        if word in word2id:
             vec = np.array([float(v) for v in cols[1:]])
         embedding[lookup_word2id(word)] = vec
     embedding[word2id["PAD"]] = np.zeros((embed_size))
@@ -55,9 +56,9 @@ def compute_cosine_similarity(x, y):
 
 DATA_DIR = "../data"
 
-# parsing sentences and building vocabulary
+# 문장을 파싱하고 사전을 만든다.
 word_freqs = collections.Counter()
-ftext = open(os.path.join(DATA_DIR, "text.tsv"), "rb")
+ftext = open(os.path.join(DATA_DIR, "text.tsv"), "r")
 sents = []
 for line in ftext:
     docid, text = line.strip().split("\t")
@@ -139,7 +140,7 @@ plt.legend(loc="best")
 plt.show()
 
 # 테스트 데이터에 대한 오토인코더 예측
-test_inputs, test_labels = test_gen.next()
+test_inputs, test_labels = test_gen.__next__()
 preds = autoencoder.predict(test_inputs)
 
 # 오토인코더의 인코더 부분 추출
@@ -151,7 +152,7 @@ k = 500
 cosims = np.zeros((k))
 i = 0
 for bid in range(num_test_steps):
-    xtest, ytest = test_gen.next()
+    xtest, ytest = test_gen.__next__()
     ytest_ = autoencoder.predict(xtest)
     Xvec = encoder.predict(xtest)
     Yvec = encoder.predict(ytest_)
