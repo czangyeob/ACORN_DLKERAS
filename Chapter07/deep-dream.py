@@ -36,7 +36,7 @@ def deprocess(img4d):
     return img
 
 
-########################### main ###########################
+########################### 메인 ###########################
 
 DATA_DIR = "../data"
 
@@ -53,16 +53,16 @@ print("After deprocess:", d_img.shape)
 plt.imshow(d_img)
 plt.show()
 
-# load pretrained VGG-16
+# 사전 학습한 VGG-16를 불러온다.
 batch_shape = p_img.shape
 dream = Input(batch_shape=batch_shape)
 model = vgg16.VGG16(input_tensor=dream, weights="imagenet", include_top=False)
 
-# create layer name to layer dictionary
+# 계층 이름으로 계층 사전 생성
 layer_dict = {layer.name : layer for layer in model.layers}
 #layer_dict
 
-# visualize gradients at pooling layers
+# 풀링 계층의 그레디언트를 시각화
 num_pool_layers = 5
 lr = 0.01
 fig, axes = plt.subplots(1, num_pool_layers, figsize=(20, 10))
@@ -81,7 +81,7 @@ for i in range(num_pool_layers):
 plt.tight_layout()
 plt.show()
 
-# deep dreaming
+# 딥 드림
 first_layer = model.layers[-1]
 input_img = first_layer.input
 print(first_layer.name, first_layer.output_shape)
@@ -94,12 +94,12 @@ for i in range(num_pool_layers):
     layer_name = "block{:d}_pool".format(i+1)
     print("Pooling Layer: {:s}".format(layer_name))
     layer_output = layer_dict[layer_name].output
-    # loss function
+    # 손실 함수
     loss = K.mean(layer_output)
-    # gradient
+    # 그레디언트
     grads = K.gradients(loss, dream)[0]
     grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
-    # optimizer
+    # 옵티마이저
     f = K.function([dream], [loss, grads])
     img_value = p_img.copy()
     fig, axes = plt.subplots(1, num_iters_per_layer, figsize=(20, 10))
@@ -109,7 +109,7 @@ for i in range(num_pool_layers):
         axes[it].imshow(deprocess(img_value))
     plt.show()
 
-# try to dream structure out of random noise
+# 드림 구조를 랜덤 노이즈로 시도
 img_noise = np.random.randint(100, 150, size=(227, 227, 3), dtype=np.uint8)
 print(img_noise.shape)
 plt.imshow(img_noise)
@@ -123,13 +123,13 @@ for i in range(num_pool_layers):
     layer_name = "block{:d}_pool".format(i+1)
     print("Pooling Layer: {:s}".format(layer_name))
     layer_output = layer_dict[layer_name].output
-    # loss function
+    # 손실 함수
     loss = K.mean(layer_output)
-#     loss = layer_output[:,:,:,24]
-    # gradient
+    # loss = layer_output[:,:,:,24]
+    # 그레디언트
     grads = K.gradients(loss, dream)[0]
     grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
-    # optimizer
+    # 옵티마이저
     f = K.function([dream], [loss, grads])
     img_value = p_img.copy()
     fig, axes = plt.subplots(1, num_iters_per_layer, figsize=(20, 10))
@@ -139,8 +139,8 @@ for i in range(num_pool_layers):
         axes[it].imshow(deprocess(img_value))
     plt.show()
     
-# random noise with specific objective. Only do gradient ascent on
-# specific label and see that this pattern shows up
+# 특정 목적을 가진 랜덤 노이즈
+# 특정 레이블에 그래디언트 어센트만하고 이 패턴이 나타나는지 확인
 num_pool_layers = 5
 num_iters_per_layer = 3
 step = 100
@@ -149,12 +149,12 @@ for i in range(num_pool_layers):
     layer_name = "block{:d}_pool".format(i+1)
     print("Pooling Layer: {:s}".format(layer_name))
     layer_output = layer_dict[layer_name].output
-    # loss function
+    # 손실 함수
     loss = layer_output[:,:,:,24]
-    # gradient
+    # 그레디언트
     grads = K.gradients(loss, dream)[0]
     grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
-    # optimizer
+    # 옵티마이저
     f = K.function([dream], [loss, grads])
     img_value = p_img.copy()
     fig, axes = plt.subplots(1, num_iters_per_layer, figsize=(20, 10))
@@ -163,5 +163,4 @@ for i in range(num_pool_layers):
         img_value += grads_value * step 
         axes[it].imshow(deprocess(img_value))
     plt.show()
-    
-    
+

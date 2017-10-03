@@ -81,7 +81,7 @@ STYLE_IMAGE_FILE = os.path.join(DATA_DIR, "JapaneseBridgeMonetCopy.jpg")
 
 RESIZED_WH = 400
 
-# verify that the content and style images are readable
+# 내용과 스타일 이미지를 읽을 수 있는 지 확인한다.
 content_img_value = imresize(plt.imread(CONTENT_IMAGE_FILE), (RESIZED_WH, RESIZED_WH))
 style_img_value = imresize(plt.imread(STYLE_IMAGE_FILE), (RESIZED_WH, RESIZED_WH))
 
@@ -95,7 +95,7 @@ plt.imshow(style_img_value)
 
 plt.show()
 
-# define content and style tensors
+# 내용 이미지에 대한 텐서와 스타일 이미지에 대한 텐서 정의
 content_img = K.variable(preprocess(content_img_value))
 style_img = K.variable(preprocess(style_img_value))
 if K.image_dim_ordering() == "th":
@@ -103,11 +103,11 @@ if K.image_dim_ordering() == "th":
 else:
     comb_img = K.placeholder((1, RESIZED_WH, RESIZED_WH, 3))
 
-# concatenate images into single input
+# 하나의 입력 값으로 이미지를 결합
 input_tensor = K.concatenate([content_img, style_img, comb_img], axis=0)
 input_tensor.get_shape()
 
-# download VGG16 model
+# VGG16 모델을 내려 받는다.
 model = vgg16.VGG16(input_tensor=input_tensor,
                    weights="imagenet", include_top=False)
 
@@ -119,8 +119,7 @@ VAR_WEIGHT = 0.01
 
 NUM_LAYERS = 5
 
-# define loss function as linear combination of content, style and variational
-# losses (defined above)
+# 손실 함수를 내용, 스타일, 차이에 대한 손실의 선형 결합으로 정의
 c_loss = content_loss(content_img, comb_img)
 s_loss = style_loss()
 v_loss = variation_loss(comb_img)

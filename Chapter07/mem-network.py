@@ -46,7 +46,7 @@ def build_vocab(train_data, test_data):
         for answer in answers:
             for word in nltk.word_tokenize(answer):
                 counter[word.lower()] += 1
-    # no OOV here because there are not too many words in dataset
+    # 데이터에 많은 단어가 있는 것이 아니기 때문에 여기서는 OOV를 사용하지 않는다.
     word2idx = {w:(i+1) for i, (w, _) in enumerate(counter.most_common())}
     word2idx["PAD"] = 0
     idx2word = {v:k for k, v in word2idx.items()}
@@ -89,64 +89,64 @@ DATA_DIR = "../data"
 TRAIN_FILE = os.path.join(DATA_DIR, "qa1_single-supporting-fact_train.txt")
 TEST_FILE = os.path.join(DATA_DIR, "qa1_single-supporting-fact_test.txt")
 
-# get the data
+# 데이터를 가져 온다.
 data_train = get_data(TRAIN_FILE)
 data_test = get_data(TEST_FILE)
 
 print(len(data_train[0]), len(data_test[0]))
 
-# build vocabulary from all the data
+# 모든 데이터로 부터 사전을 만든다.
 word2idx, idx2word = build_vocab(data_train, data_test)
 
 vocab_size = len(word2idx)
 print("vocab size: {:d}".format(len(word2idx)))
 
-# compute max sequence length for each entity
+# 각 엔티티에서 최대 시퀀스 길이를 구한다.
 story_maxlen, question_maxlen = get_maxlens(data_train, data_test)
 print("story maxlen: {:d}, question maxlen: {:d}".format(story_maxlen, question_maxlen))
 
-# vectorize the data
+# 데이터를 벡터화 한다.
 Xstrain, Xqtrain, Ytrain = vectorize(data_train, word2idx, story_maxlen, question_maxlen)
 Xstest, Xqtest, Ytest = vectorize(data_test, word2idx, story_maxlen, question_maxlen)
 
 print(Xstrain.shape, Xqtrain.shape, Ytrain.shape, Xstest.shape, Xqtest.shape, Ytest.shape)
 
-# define network
+# 네트워크를 정의
 EMBEDDING_SIZE = 64
 LATENT_SIZE = 32
-BATCH_SIZE = 64
-NUM_EPOCHS = 10
+BATCH_SIZE = 32
+NUM_EPOCHS = 50
 
-# inputs
+# 입력
 story_input = Input(shape=(story_maxlen,))
 question_input = Input(shape=(question_maxlen,))
 
-# story encoder memory
+# 스토리 인코더 메모리
 story_encoder = Embedding(input_dim=vocab_size,
                          output_dim=EMBEDDING_SIZE,
                          input_length=story_maxlen)(story_input)
 story_encoder = Dropout(0.3)(story_encoder)
 
-# question encoder
+# 질문 인코더
 question_encoder = Embedding(input_dim=vocab_size,
                             output_dim=EMBEDDING_SIZE,
                             input_length=question_maxlen)(question_input)
 question_encoder = Dropout(0.3)(question_encoder)
 
-# match between story and question
+# 스토리와 질문 사이의 비교
 match = dot([story_encoder, question_encoder], axes=[2, 2])
 
-# encode story into vector space of question
+# 스토리를 질문 벡터 공간으로 인코딩
 story_encoder_c = Embedding(input_dim=vocab_size,
                            output_dim=question_maxlen,
                            input_length=story_maxlen)(story_input)
 story_encoder_c = Dropout(0.3)(story_encoder_c)
 
-# combine match and story vectors
+# 비교한 것과 스토리 벡터 결합
 response = add([match, story_encoder_c])
 response = Permute((2, 1))(response)
 
-# combine response and question vectors
+# 응답과 질문 벡터 결합
 answer = concatenate([response, question_encoder], axis=-1)
 answer = LSTM(LATENT_SIZE)(answer)
 answer = Dropout(0.3)(answer)
@@ -157,12 +157,12 @@ model = Model(inputs=[story_input, question_input], outputs=output)
 model.compile(optimizer="rmsprop", loss="categorical_crossentropy",
               metrics=["accuracy"])
 
-# train model
+# 모델 학습
 history = model.fit([Xstrain, Xqtrain], [Ytrain], batch_size=BATCH_SIZE, 
                     epochs=NUM_EPOCHS,
                     validation_data=([Xstest, Xqtest], [Ytest]))
                     
-# plot accuracy and loss plot
+# 정확도와 손실 시각화
 plt.subplot(211)
 plt.title("Accuracy")
 plt.plot(history.history["acc"], color="g", label="train")
@@ -178,10 +178,10 @@ plt.legend(loc="best")
 plt.tight_layout()
 plt.show()
 
-# labels
+# 레이블
 ytest = np.argmax(Ytest, axis=1)
 
-# get predictions
+# 예측
 Ytest_ = model.predict([Xstest, Xqtest])
 ytest_ = np.argmax(Ytest_, axis=1)
 
