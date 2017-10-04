@@ -28,16 +28,6 @@ nb_chars = len(chars)
 char2index = dict((c, i) for i, c in enumerate(chars))
 index2char = dict((i, c) for i, c in enumerate(chars))
 
-# create inputs and labels from the text. We do this by stepping
-# through the text ${step} character at a time, and extracting a 
-# sequence of size ${seqlen} and the next output char. For example,
-# assuming an input text "The sky was falling", we would get the 
-# following sequence of input_chars and label_chars (first 5 only)
-#   The sky wa -> s
-#   he sky was ->  
-#   e sky was  -> f
-#    sky was f -> a
-#   sky was fa -> l
 print("Creating input and label text...")
 SEQLEN = 10
 STEP = 1
@@ -48,14 +38,7 @@ for i in range(0, len(text) - SEQLEN, STEP):
     input_chars.append(text[i:i + SEQLEN])
     label_chars.append(text[i + SEQLEN])
 
-# vectorize the input and label chars
-# Each row of the input is represented by seqlen characters, each 
-# represented as a 1-hot encoding of size len(char). There are 
-# len(input_chars) such rows, so shape(X) is (len(input_chars),
-# seqlen, nb_chars).
-# Each row of output is a single character, also represented as a
-# dense encoding of size len(char). Hence shape(y) is (len(input_chars),
-# nb_chars).
+# 입력과 레이블을 벡터화
 print("Vectorizing input and label text...")
 X = np.zeros((len(input_chars), SEQLEN, nb_chars), dtype=np.bool)
 y = np.zeros((len(input_chars), nb_chars), dtype=np.bool)
@@ -64,8 +47,7 @@ for i, input_char in enumerate(input_chars):
         X[i, j, char2index[ch]] = 1
     y[i, char2index[label_chars[i]]] = 1
 
-# 모델을 작성한다. We use a single RNN with a fully connected layer
-# to compute the most likely predicted output char
+# 모델을 작성한다.
 HIDDEN_SIZE = 128
 BATCH_SIZE = 128
 NUM_ITERATIONS = 25
@@ -81,15 +63,12 @@ model.add(Activation("softmax"))
 
 model.compile(loss="categorical_crossentropy", optimizer="rmsprop")
 
-# We train the model in batches and test output generated at each step
 for iteration in range(NUM_ITERATIONS):
     print("=" * 50)
     print("Iteration #: %d" % (iteration))
     model.fit(X, y, batch_size=BATCH_SIZE, epochs=NUM_EPOCHS_PER_ITERATION)
     
-    # testing model
-    # randomly choose a row from input_chars, then use it to 
-    # generate text from model for next 100 chars
+    # 모델 테스트
     test_idx = np.random.randint(len(input_chars))
     test_chars = input_chars[test_idx]
     print("Generating from seed: %s" % (test_chars))
@@ -101,6 +80,5 @@ for iteration in range(NUM_ITERATIONS):
         pred = model.predict(Xtest, verbose=0)[0]
         ypred = index2char[np.argmax(pred)]
         print(ypred, end="")
-        # move forward with test_chars + ypred
         test_chars = test_chars[1:] + ypred
     print()
