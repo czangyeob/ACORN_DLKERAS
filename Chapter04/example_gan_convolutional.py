@@ -1,6 +1,6 @@
 import matplotlib as mpl
 
-# This line allows mpl to run with no DISPLAY defined
+# 이 줄은 DISPLAY를 저의하지 않아도 mpl이 실행되도록 한다.
 mpl.use('Agg')
 
 from keras.layers import Flatten, Dropout, LeakyReLU, Input, Activation
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                               player_optimizers=[Adam(1e-4, decay=1e-4), Adam(1e-3, decay=1e-4)],
                               loss='binary_crossentropy')
 
-    # train model
+    # 모델 학습
     generator_cb = ImageGridCallback("output/gan_convolutional/epoch-{:03d}.png",
                                      generator_sampler(latent_dim, generator))
 

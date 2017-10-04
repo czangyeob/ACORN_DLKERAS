@@ -1,6 +1,6 @@
 import matplotlib as mpl
 
-# This line allows mpl to run with no DISPLAY defined
+# 이 줄은 DISPLAY를 저의하지 않아도 mpl이 실행되도록 한다.
 mpl.use('Agg')
 
 import pandas as pd
@@ -12,7 +12,6 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.callbacks import TensorBoard
 from keras_adversarial.image_grid_callback import ImageGridCallback
-
 from keras_adversarial import AdversarialModel, simple_gan, gan_targets
 from keras_adversarial import AdversarialOptimizerSimultaneous, normal_latent_sampling
 from keras_adversarial.legacy import Dense, BatchNormalization, fit, l1l2, Convolution2D, AveragePooling2D
@@ -29,15 +28,15 @@ def model_generator():
     model.add(Dense(nch * 4 * 4, input_dim=100, W_regularizer=reg()))
     model.add(BatchNormalization(mode=0))
     model.add(Reshape(dim_ordering_shape((nch, 4, 4))))
-    model.add(Convolution2D(nch / 2, h, h, border_mode='same', W_regularizer=reg()))
+    model.add(Convolution2D(int(nch / 2), h, h, border_mode='same', W_regularizer=reg()))
     model.add(BatchNormalization(mode=0, axis=1))
     model.add(LeakyReLU(0.2))
     model.add(UpSampling2D(size=(2, 2)))
-    model.add(Convolution2D(nch / 2, h, h, border_mode='same', W_regularizer=reg()))
+    model.add(Convolution2D(int(nch / 2), h, h, border_mode='same', W_regularizer=reg()))
     model.add(BatchNormalization(mode=0, axis=1))
     model.add(LeakyReLU(0.2))
     model.add(UpSampling2D(size=(2, 2)))
-    model.add(Convolution2D(nch / 4, h, h, border_mode='same', W_regularizer=reg()))
+    model.add(Convolution2D(int(nch / 4), h, h, border_mode='same', W_regularizer=reg()))
     model.add(BatchNormalization(mode=0, axis=1))
     model.add(LeakyReLU(0.2))
     model.add(UpSampling2D(size=(2, 2)))
@@ -51,9 +50,9 @@ def model_discriminator():
     h = 5
     reg = lambda: l1l2(l1=1e-7, l2=1e-7)
 
-    c1 = Convolution2D(nch / 4, h, h, border_mode='same', W_regularizer=reg(),
+    c1 = Convolution2D(int(nch / 4), h, h, border_mode='same', W_regularizer=reg(),
                        input_shape=dim_ordering_shape((3, 32, 32)))
-    c2 = Convolution2D(nch / 2, h, h, border_mode='same', W_regularizer=reg())
+    c2 = Convolution2D(int(nch / 2), h, h, border_mode='same', W_regularizer=reg())
     c3 = Convolution2D(nch, h, h, border_mode='same', W_regularizer=reg())
     c4 = Convolution2D(1, h, h, border_mode='same', W_regularizer=reg())
 
@@ -90,7 +89,7 @@ def example_gan(adversarial_optimizer, path, opt_g, opt_d, nb_epoch, generator, 
                      discriminator=discriminator,
                      latent_sampling=normal_latent_sampling((latent_dim,)))
 
-    # build adversarial model
+    # 적대적 모델 정의
     model = AdversarialModel(base_model=gan,
                              player_params=[generator.trainable_weights, discriminator.trainable_weights],
                              player_names=["generator", "discriminator"])
@@ -98,7 +97,7 @@ def example_gan(adversarial_optimizer, path, opt_g, opt_d, nb_epoch, generator, 
                               player_optimizers=[opt_g, opt_d],
                               loss=loss)
 
-    # create callback to generate images
+    # 이미지 생성을 위한 콜백 생성
     zsamples = np.random.normal(size=(10 * 10, latent_dim))
 
     def generator_sampler():
@@ -107,23 +106,27 @@ def example_gan(adversarial_optimizer, path, opt_g, opt_d, nb_epoch, generator, 
 
     generator_cb = ImageGridCallback(os.path.join(path, "epoch-{:03d}.png"), generator_sampler, cmap=None)
 
-    # train model
+    # 모델 학습
     xtrain, xtest = cifar10_data()
     y = targets(xtrain.shape[0])
     ytest = targets(xtest.shape[0])
     callbacks = [generator_cb]
+    K.set_image_dim_ordering('tf')
     if K.backend() == "tensorflow":
+        os.makedirs(path + '/logs',exist_ok=True)
         callbacks.append(
             TensorBoard(log_dir=os.path.join(path, 'logs'), histogram_freq=0, write_graph=True, write_images=True))
-    history = fit(model, x=dim_ordering_fix(xtrain), y=y, validation_data=(dim_ordering_fix(xtest), ytest),
+
+    history = fit(model, x=xtrain, y=y, validation_data=(xtest, ytest),
                   callbacks=callbacks, nb_epoch=nb_epoch,
                   batch_size=32)
 
-    # save history to CSV
+
+    # 히스토리를 CSV에 저장
     df = pd.DataFrame(history.history)
     df.to_csv(csvpath)
 
-    # save models
+    # 모델 저장
     generator.save(os.path.join(path, "generator.h5"))
     discriminator.save(os.path.join(path, "discriminator.h5"))
 
@@ -139,9 +142,10 @@ def main():
     example_gan(AdversarialOptimizerSimultaneous(), "output/gan-cifar10",
                 opt_g=Adam(1e-4, decay=1e-5),
                 opt_d=Adam(1e-3, decay=1e-5),
-                nb_epoch=100, generator=generator, discriminator=discriminator,
+                nb_epoch=1, generator=generator, discriminator=discriminator,
                 latent_dim=latent_dim)
 
 
 if __name__ == "__main__":
     main()
+
