@@ -142,7 +142,7 @@ def main():
     example_gan(AdversarialOptimizerSimultaneous(), "output/gan-cifar10",
                 opt_g=Adam(1e-4, decay=1e-5),
                 opt_d=Adam(1e-3, decay=1e-5),
-                nb_epoch=1, generator=generator, discriminator=discriminator,
+                nb_epoch=10, generator=generator, discriminator=discriminator,
                 latent_dim=latent_dim)
 
 

@@ -7,9 +7,9 @@ from keras.layers.convolutional import ZeroPadding2D
 from keras.models import Sequential
 import numpy as np
 
-# test harness
-# creates a Sequential model out of a single layer and passes the 
-# input through it to produce output
+# 테스트 안전 벨트
+# 단일 계층에서 순차 모델을 생성하고
+# 이를 통해 입력을 전달하여 출력을 생성한다.
 def test_layer(layer, x):
     layer_config = layer.get_config()
     layer_config["input_shape"] = x.shape
@@ -20,7 +20,7 @@ def test_layer(layer, x):
     x_ = np.expand_dims(x, axis=0)
     return model.predict(x_)[0]
     
-# custom layer
+# 사용자 정의 계층
 class LocalResponseNormalization(Layer):
     
     def __init__(self, n=5, alpha=0.0005, beta=0.75, k=2, **kwargs):
@@ -56,7 +56,7 @@ class LocalResponseNormalization(Layer):
         return input_shape
 
 
-# test the test harness
+# 테스트 안전벨트를 테스트
 x = np.random.randn(10, 10)
 layer = Dropout(0.5)
 y = test_layer(layer, x)
@@ -73,7 +73,7 @@ layer = Reshape((5, 20))
 y = test_layer(layer, x)
 assert(y.shape == (5, 20))
 
-# test custom layer
+# 사용자 정의 계층 테스트
 x = np.random.randn(225, 225, 3)
 layer = LocalResponseNormalization()
 y = test_layer(layer, x)

@@ -67,6 +67,7 @@ if __name__ == "__main__":
 
     # 사전 학습된 모델 테스트
     model = VGG_16('./vgg16_weights_tf_dim_ordering_tf_kernels.h5') # 파일 다운로드 필요
+    # https://github.com/fchollet/deep-learning-models/releases
 
     optimizer = SGD()
     model.compile(optimizer=optimizer, loss='categorical_crossentropy')
