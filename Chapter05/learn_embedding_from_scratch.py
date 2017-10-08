@@ -10,6 +10,7 @@ import collections
 import matplotlib.pyplot as plt
 import nltk
 import numpy as np
+import codecs
 
 np.random.seed(42)
 
@@ -22,7 +23,7 @@ BATCH_SIZE = 64
 NUM_EPOCHS = 20
 
 counter = collections.Counter()
-fin = open(INPUT_FILE, "r")
+fin = codecs.open(INPUT_FILE, "r", encoding='utf-8')
 maxlen = 0
 for line in fin:
     _, sent = line.strip().split("\t")
@@ -40,7 +41,7 @@ vocab_sz = len(word2index) + 1
 index2word = {v:k for k, v in word2index.items()}
     
 xs, ys = [], []
-fin = open(INPUT_FILE, "r")
+fin = codecs.open(INPUT_FILE, "r", encoding='utf-8')
 for line in fin:
     label, sent = line.strip().split("\t")
     ys.append(int(label))

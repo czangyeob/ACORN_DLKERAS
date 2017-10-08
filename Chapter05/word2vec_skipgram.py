@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import nltk
 import numpy as np
 import operator
+import codecs
 
 np.random.seed(42)
 
@@ -16,7 +17,7 @@ BATCH_SIZE = 128
 NUM_EPOCHS = 20
 
 lines = []
-fin = open("../data/alice_in_wonderland.txt", "r")
+fin = codecs.open("../data/alice_in_wonderland.txt", "r", encoding='UTF-8')
 for line in fin:
     line = line.strip()
     if len(line) == 0:
@@ -60,7 +61,7 @@ model.add(Activation("softmax"))
 model.compile(optimizer="rmsprop", loss="categorical_crossentropy", 
               metrics=["accuracy"])
 history = model.fit(Xtrain, Ytrain, batch_size=BATCH_SIZE, 
-                    nb_epoch=NUM_EPOCHS, verbose=1,
+                    epochs=NUM_EPOCHS, verbose=1,
                     validation_data=(Xtest, Ytest))
 
 # plot loss function

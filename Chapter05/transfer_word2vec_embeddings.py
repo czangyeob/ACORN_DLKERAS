@@ -8,6 +8,7 @@ import collections
 import matplotlib.pyplot as plt
 import nltk
 import numpy as np
+import codecs
 
 np.random.seed(42)
 
@@ -20,7 +21,7 @@ NUM_EPOCHS = 10
 
 print("reading data...")
 counter = collections.Counter()
-fin = open(INPUT_FILE, "r")
+fin = codecs.open(INPUT_FILE, "r", encoding='utf-8')
 maxlen = 0
 for line in fin:
     _, sent = line.strip().split("\t")
@@ -41,7 +42,7 @@ index2word[0] = "_UNK_"
 
 print("creating word sequences...")
 ws, ys = [], []
-fin = open(INPUT_FILE, "r")
+fin = codecs.open(INPUT_FILE, "r", encoding='utf-8')
 for line in fin:
     label, sent = line.strip().split("\t")
     ys.append(int(label))

@@ -9,12 +9,10 @@ embed_size = 300
 window_size = 1
 
 model = Sequential()
-model.add(Embedding(input_dim=vocab_size, output_dim=embed_size, 
-                    init='glorot_uniform',
-                    input_length=window_size*2))
+model.add(Embedding(input_dim=5000, output_dim=300, input_length=2, embeddings_initializer="glorot_uniform"))
+
 model.add(Lambda(lambda x: K.mean(x, axis=1), output_shape=(embed_size,)))
-model.add(Dense(vocab_size, init='glorot_uniform',
-                activation='softmax'))
+model.add(Dense(5000, activation="softmax", kernel_initializer="glorot_uniform"))
 
 model.compile(loss='categorical_crossentropy', optimizer="adadelta")
 
