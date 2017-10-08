@@ -11,11 +11,12 @@ import collections
 import matplotlib.pyplot as plt
 import nltk
 import numpy as np
+import codecs
 
 np.random.seed(42)
 
 INPUT_FILE = "../data/umich-sentiment-train.txt"
-WORD2VEC_MODEL = "../data/GoogleNews-vectors-negative300.bin.gz"
+WORD2VEC_MODEL = "../data/GoogleNews-vectors-negative300.bin.gz" # https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit
 VOCAB_SIZE = 5000
 EMBED_SIZE = 300
 NUM_FILTERS = 256
@@ -24,7 +25,7 @@ BATCH_SIZE = 64
 NUM_EPOCHS = 10
 
 counter = collections.Counter()
-fin = open(INPUT_FILE, "r")
+fin = codecs.open(INPUT_FILE, "r", encoding='UTF-8')
 maxlen = 0
 for line in fin:
     _, sent = line.strip().split("\t")
@@ -42,7 +43,7 @@ vocab_sz = len(word2index) + 1
 index2word = {v:k for k, v in word2index.items()}
     
 xs, ys = [], []
-fin = open(INPUT_FILE, "r")
+fin = codecs.open(INPUT_FILE, "r", encoding='UTF-8')
 for line in fin:
     label, sent = line.strip().split("\t")
     ys.append(int(label))
